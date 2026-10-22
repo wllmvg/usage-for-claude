@@ -250,9 +250,11 @@ function Specs() {
           <p>Todo lo que hace, sin letra pequeña.</p>
           <h3>Instalación</h3>
           <ol className="steps">
-            <li>Descarga <span className="mono amber">tally.exe</span> y ábrelo.</li>
+            <li>Inicia sesión en Claude Code con tu cuenta de Claude: abre una terminal, escribe <span className="mono amber">claude</span> y dentro <span className="mono amber">/login</span>. Solo hace falta una vez.</li>
+            <li>Descarga <span className="mono amber">tally.exe</span>, muévelo a una carpeta fija (no lleva instalador) y ábrelo con doble clic.</li>
             <li>Si Windows muestra “Windows protegió su PC”, pulsa <em>Más información</em> y luego <em>Ejecutar de todas formas</em>.</li>
-            <li>Aparece en la bandeja. Clic para ver tu uso; clic derecho para ajustarlo.</li>
+            <li>Aparece en la bandeja. Clic para ver tu uso; el engranaje del popup abre los ajustes.</li>
+            <li>Para que se abra solo, activa <em>Con Windows</em> en los ajustes. Si lo quieres en el menú Inicio, clic derecho en <span className="mono">tally.exe</span> y <em>Anclar a Inicio</em>.</li>
           </ol>
           <h3>Atajos</h3>
           <dl className="keys">
@@ -336,7 +338,8 @@ function Changelog() {
 
 function Faq() {
   const qs = [
-    ['¿Necesito Claude Code?', 'Sí. El monitor lee la sesión que Claude Code guarda en tu equipo; no tiene inicio de sesión propio. No hace falta tenerlo abierto, pero sí usarlo de vez en cuando para que la sesión siga vigente. Claude Desktop y la web no sirven.'],
+    ['¿Necesito Claude Code?', 'Sí. El monitor lee la sesión que Claude Code guarda en tu equipo; no tiene inicio de sesión propio. Inicia sesión una vez: escribe claude en una terminal y luego /login. No hace falta tenerlo abierto, pero sí usarlo de vez en cuando para que la sesión siga vigente; si caduca, repite /login. Claude Desktop y la web no sirven.'],
+    ['¿Mi sesión sale de mi equipo?', 'No. /login la guarda en tu equipo, en ~/.claude/.credentials.json. Tally solo la lee de ahí para preguntar tu uso a api.anthropic.com, el mismo servidor con el que ya habla Claude Code. No la copia, no la guarda en otro sitio y no la envía a nadie más.'],
     ['¿Qué datos envía y a dónde?', 'Una consulta de uso a api.anthropic.com cada 5 minutos, con tu sesión de Claude Code. Nada más: sin analíticas, sin servidores propios. Tu sesión nunca sale de tu equipo hacia otro sitio.'],
     ['¿Por qué Windows me avisa al abrirlo?', 'El ejecutable aún no está firmado con un certificado de pago, y SmartScreen avisa ante cualquier programa nuevo sin firma. Puedes comprobar que el archivo es el original con el SHA-256 de esta página.'],
     ['¿Es oficial? ¿Lo permite Anthropic?', 'No es oficial. Anthropic limita el uso de las sesiones de suscripción a Claude Code y Claude.ai, y la consulta de uso no está documentada: puede cambiar o dejar de funcionar. Úsalo con tu propio criterio.'],

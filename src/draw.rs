@@ -40,7 +40,13 @@ pub fn palette(dark: bool, accent: Accent) -> Palette {
 
 pub struct Row { pub label: &'static str, pub sub: &'static str, pub pct: f32, pub pace: Option<f32>, pub meta: String, pub level: u8 }
 
-pub struct View { pub rows: Vec<Row>, pub message: Option<(String, String)>, pub footer_left: String, pub footer_right: String }
+pub struct Setting { pub label: &'static str, pub options: Vec<(String, u32, bool)> }
+
+pub struct View { pub rows: Vec<Row>, pub message: Option<(String, String)>, pub footer_left: String, pub footer_right: String, pub settings: Option<Vec<Setting>> }
+
+const SET_LABEL: f32 = 84.0;
+const SET_ROW: f32 = 28.0;
+const SET_GAP: f32 = 6.0;
 
 struct S { pad: f32, gap: f32, inner: f32, num: f32, label: f32, ring: f32 }
 
@@ -56,6 +62,21 @@ pub fn buttons(cfg: &Config) -> [(f32, f32, f32, f32); 2] {
     let s = sizes(cfg);
     let x1 = WIDTH - s.pad;
     [(x1 - 64.0, s.pad, x1 - 32.0, s.pad + 32.0), (x1 - 32.0, s.pad, x1, s.pad + 32.0)]
+}
+
+pub fn chips(cfg: &Config, settings: &[Setting]) -> Vec<((f32, f32, f32, f32), u32)> {
+    let s = sizes(cfg);
+    let (x0, x1) = (s.pad + SET_LABEL, WIDTH - s.pad);
+    let mut out = Vec::new();
+    for (i, row) in settings.iter().enumerate() {
+        let y = s.pad + 32.0 + s.gap + i as f32 * (SET_ROW + SET_GAP);
+        let w = (x1 - x0) / row.options.len() as f32;
+        for (j, (_, id, _)) in row.options.iter().enumerate() {
+            let x = x0 + j as f32 * w;
+            out.push(((x, y, x + w, y + SET_ROW), *id));
+        }
+    }
+    out
 }
 
 pub struct Renderer {
@@ -115,14 +136,31 @@ impl Renderer {
         let (x0, x1) = (s.pad, WIDTH - s.pad);
         let mut y = s.pad;
         if let Some((rt, b)) = d {
-            self.text(rt, b, "Uso", 13.0, DWRITE_FONT_WEIGHT_MEDIUM, &p.mute, rect(x0, y, 100.0, 32.0), DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+            let title = if v.settings.is_some() { "Ajustes" } else { "Uso" };
+            self.text(rt, b, title, 13.0, DWRITE_FONT_WEIGHT_MEDIUM, &p.mute, rect(x0, y, 100.0, 32.0), DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
             let [r1, r2] = buttons(cfg);
             self.icon(rt, b, "\u{E72C}", &p.mute, r1.0, r1.1);
-            self.icon(rt, b, "\u{E713}", &p.mute, r2.0, r2.1);
+            self.icon(rt, b, "\u{E713}", if v.settings.is_some() { &p.fg } else { &p.mute }, r2.0, r2.1);
         }
         y += 32.0 + s.gap;
 
-        if let Some((title, detail)) = &v.message {
+        if let Some(set) = &v.settings {
+            if let Some((rt, b)) = d {
+                for (i, row) in set.iter().enumerate() {
+                    let ry = y + i as f32 * (SET_ROW + SET_GAP);
+                    self.text(rt, b, row.label, 12.0, DWRITE_FONT_WEIGHT_NORMAL, &p.mute, rect(x0, ry, SET_LABEL, SET_ROW), DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+                }
+                for ((r, _), (text, _, on)) in chips(cfg, set).into_iter().zip(set.iter().flat_map(|row| &row.options)) {
+                    let box_ = rect(r.0 + 2.0, r.1, r.2 - r.0 - 4.0, r.3 - r.1);
+                    if *on {
+                        self.fill(rt, b, &p.track, box_, 6.0);
+                    }
+                    let (c, wt) = if *on { (&p.fg, DWRITE_FONT_WEIGHT_MEDIUM) } else { (&p.mute, DWRITE_FONT_WEIGHT_NORMAL) };
+                    self.text(rt, b, text, 12.0, wt, c, box_, DWRITE_TEXT_ALIGNMENT_CENTER, DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+                }
+            }
+            y += set.len() as f32 * (SET_ROW + SET_GAP) - SET_GAP + s.gap;
+        } else if let Some((title, detail)) = &v.message {
             if let Some((rt, b)) = d {
                 self.text(rt, b, title, 14.0, DWRITE_FONT_WEIGHT_MEDIUM, &p.fg, rect(x0, y, x1 - x0, 20.0), DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
                 self.wrapped(rt, b, detail, &p.mute, rect(x0, y + 22.0, x1 - x0, 34.0));

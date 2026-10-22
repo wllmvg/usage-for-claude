@@ -41,6 +41,7 @@ struct App {
     hidden_at: Instant,
     inbox: Arc<Mutex<Option<std::result::Result<Usage, FetchError>>>>,
     taskbar_created: u32,
+    settings: bool,
 }
 
 thread_local! { static APP: Cell<*mut App> = const { Cell::new(std::ptr::null_mut()) }; }
@@ -131,7 +132,11 @@ impl App {
             _ => String::new(),
         };
         let footer_right = if cfg.show_ram { format!("{:.1} MB de RAM", ram_mb()).replace('.', ",") } else { String::new() };
-        draw::View { rows, message, footer_left, footer_right }
+        let settings = self.settings.then(|| settings_rows(cfg));
+        if settings.is_some() {
+            rows.clear();
+        }
+        draw::View { rows, message, footer_left, footer_right, settings }
     }
 
     fn refresh(&mut self) {
@@ -306,6 +311,7 @@ impl App {
             self.r.release();
             let _ = EmptyWorkingSet(GetCurrentProcess());
         }
+        self.settings = false;
         self.hidden_at = Instant::now();
     }
 
@@ -337,9 +343,12 @@ impl App {
         if inside(refresh) {
             self.refresh();
         } else if inside(settings) {
-            let mut p = POINT { x: (settings.0 * k) as i32, y: (settings.3 * k) as i32 };
-            unsafe { let _ = ClientToScreen(self.hwnd, &mut p); }
-            menu(self.hwnd, p);
+            self.settings ^= true;
+            self.redraw();
+        } else if self.settings {
+            if let Some(&(_, id)) = draw::chips(&self.cfg, &settings_rows(&self.cfg)).iter().find(|(r, _)| inside(*r)) {
+                self.command(id);
+            }
         }
     }
 
@@ -377,6 +386,23 @@ impl App {
 
 const WARN: [f32; 4] = [50.0, 60.0, 70.0, 80.0];
 const CRIT: [f32; 3] = [80.0, 90.0, 95.0];
+
+fn settings_rows(c: &Config) -> Vec<draw::Setting> {
+    let row = |label, items: &[(&str, u32, bool)]| draw::Setting { label, options: items.iter().map(|&(t, id, on)| (t.to_string(), id, on)).collect() };
+    let pct = |label, base: u32, vals: &[f32], cur: f32| draw::Setting { label, options: vals.iter().zip(base..).map(|(v, id)| (format!("{v}%"), id, cur == *v)).collect() };
+    vec![
+        row("Tema", &[("Sistema", 10, c.theme == Theme::Sistema), ("Claro", 11, c.theme == Theme::Claro), ("Oscuro", 12, c.theme == Theme::Oscuro)]),
+        row("Acento", &[("Tinta", 20, c.accent == Accent::Tinta), ("Arcilla", 21, c.accent == Accent::Arcilla), ("Azul", 22, c.accent == Accent::Azul), ("Salvia", 23, c.accent == Accent::Salvia)]),
+        row("Forma", &[("Barras", 30, c.shape == Shape::Barras), ("Anillos", 31, c.shape == Shape::Anillos), ("Números", 32, c.shape == Shape::Numeros)]),
+        row("Densidad", &[("Cómoda", 40, !c.compact), ("Compacta", 41, c.compact)]),
+        row("Mostrar", &[("Sesión", 50, c.show_session), ("Semana", 51, c.show_week), ("Opus", 52, c.show_opus)]),
+        row("Detalles", &[("Reinicio", 53, c.show_reset), ("Ritmo", 54, c.show_pace), ("RAM", 55, c.show_ram)]),
+        pct("Cerca", 60, &WARN, c.warn_at),
+        pct("Agotado", 70, &CRIT, c.crit_at),
+        row("Icono", &[("Sesión", 80, c.tray_metric == TrayMetric::Sesion), ("Semana", 81, c.tray_metric == TrayMetric::Semana), ("El más alto", 82, c.tray_metric == TrayMetric::Mayor)]),
+        row("Sistema", &[("Avisos", 75, c.notify), ("Con Windows", 90, config::startup_enabled())]),
+    ]
+}
 
 fn menu(hwnd: HWND, at: POINT) {
     let Some(a) = app() else { return };
@@ -504,6 +530,7 @@ fn main() -> Result<()> {
             hidden_at: Instant::now(),
             inbox: Arc::default(),
             taskbar_created: RegisterWindowMessageW(w!("TaskbarCreated")),
+            settings: false,
         });
         APP.with(|a| a.set(Box::into_raw(app)));
         let a = self::app().unwrap();
