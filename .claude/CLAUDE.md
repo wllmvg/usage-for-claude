@@ -42,7 +42,7 @@ El usuario escribe en español; la interfaz, los textos y las respuestas van en 
 - **Depende de Claude Code**: solo lee el token, no lo renueva. Renovarlo nosotros rotaría el refresh token de Claude Code. Si caduca, la UI pide abrir Claude Code. No añadir un login OAuth propio: Anthropic restringe el uso de los tokens de suscripción en apps de terceros (documentado en la FAQ de la web).
 - **Menús claros en modo oscuro**: los menús nativos no siguen el tema; harían falta llamadas no documentadas de `uxtheme`.
 - Los ajustes se editan dentro del mismo popup (engranaje → vista "Ajustes" con chips, `settings_rows` en `main.rs`, `chips` en `draw.rs`), sin ventana aparte. El menú contextual del icono solo tiene "Salir". Los ajustes no se pueden usar con teclado.
-- Se distribuye con instalador por usuario (`PrivilegesRequired=lowest`, por defecto en `%LOCALAPPDATA%ProgramsTally`). El exe no lleva icono propio (la toolchain GNU no trae `windres`); los accesos directos usan `tally.ico` instalado al lado.
+- Se distribuye con instalador por usuario (`PrivilegesRequired=lowest`, por defecto en `%LOCALAPPDATA%\Programs\Tally`). El exe no lleva icono propio (la toolchain GNU no trae `windres`); los accesos directos usan `tally.ico` instalado al lado.
 - Un token vacío en `.credentials.json` (Claude Code cerró la sesión) se trata como `NoLogin` sin llamar a la API: llamar con token vacío devolvía 429 con una hora de espera.
 - Ejecutable sin firmar: SmartScreen avisa. Opciones gratuitas: Microsoft Store (MSIX) o SignPath Foundation.
 
@@ -61,8 +61,8 @@ Toolchain: `stable-x86_64-pc-windows-gnu` (no requiere Visual Studio). Crate `wi
 Instalador (requiere Inno Setup 6: `winget install JRSoftware.InnoSetup`):
 
 ```powershell
-powershell -File installerassets.ps1   # solo si cambias el logo
-& "$env:LOCALAPPDATAProgramsInno Setup 6ISCC.exe" installer	ally.iss   # -> distTally-Setup-0.1.0.exe
+powershell -File installer\assets.ps1   # solo si cambias el logo
+& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\tally.iss   # -> dist\Tally-Setup-0.1.0.exe
 ```
 
 La versión está en `Cargo.toml`, `installer/tally.iss` (`AppVersion`) y `RELEASE` en `web/src/App.jsx`.
