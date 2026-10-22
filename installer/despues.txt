@@ -1,0 +1,14 @@
+﻿Un último paso: inicia sesión en Claude Code
+
+Tally lee la sesión que Claude Code guarda en tu equipo. Si aún no la has iniciado, o si Tally te dice que tu sesión expiró:
+
+  1. Abre una terminal: pulsa Win + R, escribe powershell y pulsa Enter.
+  2. Escribe claude y pulsa Enter.
+  3. Dentro de Claude Code, escribe /login y elige tu cuenta de Claude.
+  4. Termina el inicio de sesión en el navegador y escribe /exit.
+
+Tally lo detectará solo en unos minutos.
+
+Tu sesión se queda en tu equipo (~/.claude/.credentials.json). Tally solo la lee para preguntar tu uso a api.anthropic.com; no la copia ni la envía a ningún otro sitio.
+
+Tally no es un producto oficial de Anthropic ni está afiliado a Anthropic.

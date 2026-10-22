@@ -163,9 +163,9 @@ impl Renderer {
         } else if let Some((title, detail)) = &v.message {
             if let Some((rt, b)) = d {
                 self.text(rt, b, title, 14.0, DWRITE_FONT_WEIGHT_MEDIUM, &p.fg, rect(x0, y, x1 - x0, 20.0), DWRITE_TEXT_ALIGNMENT_LEADING, DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-                self.wrapped(rt, b, detail, &p.mute, rect(x0, y + 22.0, x1 - x0, 34.0));
+                self.wrapped(rt, b, detail, &p.mute, rect(x0, y + 22.0, x1 - x0, 48.0));
             }
-            y += 56.0 + s.gap;
+            y += 70.0 + s.gap;
         }
 
         for r in &v.rows {

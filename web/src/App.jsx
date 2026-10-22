@@ -4,10 +4,12 @@ import { useInView, useProgress, useReveal, useScrolled } from './motion.js';
 
 const RELEASE = {
   version: '0.1.0',
-  size: '384 KB',
-  sha256: '[HASH DEL RELEASE]',
-  date: '[FECHA]',
-  download: 'https://github.com/wllmvg/usage-for-claude/releases/latest',
+  size: '388 KB',
+  setup: 'Tally-Setup-0.1.0.exe',
+  setupSize: '2,2 MB',
+  sha256: '6351fb664a5e1355e0636c64fc2c9386ef2306504e1144202db891a0ec1631a8',
+  date: '22 oct 2026',
+  download: 'https://github.com/wllmvg/usage-for-claude/releases/latest/download/Tally-Setup-0.1.0.exe',
   repo: 'https://github.com/wllmvg/usage-for-claude',
   issues: 'https://github.com/wllmvg/usage-for-claude/issues',
   license: 'https://github.com/wllmvg/usage-for-claude/blob/main/LICENSE',
@@ -73,14 +75,14 @@ function Hero() {
             <span className="line"><span>Tu límite de Claude,</span></span>{' '}
             <span className="line"><span className="amber">a un vistazo.</span></span>
           </h1>
-          <p className="lead rise" style={{ '--i': 2 }}>Un monitor para la bandeja de Windows con tu sesión de 5 horas y tu límite semanal. Sin instalador, sin navegador por dentro, sin ruido.</p>
+          <p className="lead rise" style={{ '--i': 2 }}>Un monitor para la bandeja de Windows con tu sesión de 5 horas y tu límite semanal. Se instala en un minuto, sin navegador por dentro, sin ruido.</p>
           <div className="actions rise" style={{ '--i': 3 }}>
             <DownloadButton />
             <a className="btn btn-ghost" href={RELEASE.repo}>Ver el código</a>
           </div>
           <dl className="facts mono rise" style={{ '--i': 4 }}>
             <dt>versión</dt><dd>{RELEASE.version} · x64 · Windows 10 y 11</dd>
-            <dt>archivo</dt><dd>tally.exe · {RELEASE.size}</dd>
+            <dt>archivo</dt><dd>{RELEASE.setup} · {RELEASE.setupSize}</dd>
             <dt>sha-256</dt><dd className="break">{RELEASE.sha256}</dd>
           </dl>
           <p className="note rise" style={{ '--i': 5 }}>Necesitas <a href="#preguntas">Claude Code con la sesión iniciada</a> en el mismo equipo.</p>
@@ -232,7 +234,7 @@ function Customize() {
 
 function Specs() {
   const rows = [
-    ['Ejecutable', `${RELEASE.size}, sin instalador`],
+    ['Instalador', `${RELEASE.setupSize}; la app ocupa ${RELEASE.size}`],
     ['Memoria en reposo', '≈ 5 MB', 'sage'],
     ['Dependencias', 'ninguna'],
     ['Sistema', 'Windows 10 y 11, x64'],
@@ -250,16 +252,16 @@ function Specs() {
           <p>Todo lo que hace, sin letra pequeña.</p>
           <h3>Instalación</h3>
           <ol className="steps">
-            <li>Inicia sesión en Claude Code con tu cuenta de Claude: abre una terminal, escribe <span className="mono amber">claude</span> y dentro <span className="mono amber">/login</span>. Solo hace falta una vez.</li>
-            <li>Descarga <span className="mono amber">tally.exe</span>, muévelo a una carpeta fija (no lleva instalador) y ábrelo con doble clic.</li>
+            <li>Descarga <span className="mono amber">{RELEASE.setup}</span> y ábrelo.</li>
             <li>Si Windows muestra “Windows protegió su PC”, pulsa <em>Más información</em> y luego <em>Ejecutar de todas formas</em>.</li>
+            <li>Elige dónde instalarlo y si se abre al iniciar Windows. Queda en el menú Inicio, sin permisos de administrador.</li>
+            <li>Inicia sesión en Claude Code con tu cuenta de Claude: abre una terminal, escribe <span className="mono amber">claude</span> y dentro <span className="mono amber">/login</span>. Solo hace falta una vez, y Tally te lo recuerda si falta.</li>
             <li>Aparece en la bandeja. Clic para ver tu uso; el engranaje del popup abre los ajustes.</li>
-            <li>Para que se abra solo, activa <em>Con Windows</em> en los ajustes. Si lo quieres en el menú Inicio, clic derecho en <span className="mono">tally.exe</span> y <em>Anclar a Inicio</em>.</li>
           </ol>
           <h3>Atajos</h3>
           <dl className="keys">
             <dt><kbd>Clic</kbd></dt><dd>Abre o cierra el popup</dd>
-            <dt><kbd>Clic derecho</kbd></dt><dd>Ajustes, umbrales y salir</dd>
+            <dt><kbd>Clic derecho</kbd></dt><dd>Salir</dd>
             <dt><kbd>Esc</kbd></dt><dd>Cierra el popup</dd>
             <dt><kbd>Win</kbd> <kbd>B</kbd></dt><dd>Lleva el foco a la bandeja; con flechas y <kbd>Enter</kbd> lo abres sin ratón</dd>
           </dl>
@@ -286,9 +288,9 @@ function Developers() {
         </div>
         <div className="codes">
           <div className="reveal" style={{ '--i': 0 }}>
-            <CodeBlock title="PowerShell · verificar la descarga" copy={'Get-FileHash .\\tally.exe -Algorithm SHA256'}>
+            <CodeBlock title="PowerShell · verificar la descarga" copy={`Get-FileHash .\\${RELEASE.setup} -Algorithm SHA256`}>
               <span className="dim"># debe coincidir con el SHA-256 de esta página</span>{'\n'}
-              <span className="amber">Get-FileHash</span> .\tally.exe -Algorithm SHA256
+              <span className="amber">Get-FileHash</span> .\{RELEASE.setup} -Algorithm SHA256
             </CodeBlock>
           </div>
           <div className="reveal" style={{ '--i': 1 }}>

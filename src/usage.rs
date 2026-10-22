@@ -30,8 +30,8 @@ pub enum FetchError {
 impl FetchError {
     pub fn message(&self) -> (String, String) {
         let (t, d) = match self {
-            FetchError::NoLogin => ("No encuentro tu sesión de Claude", "Inicia sesión en Claude Code y pulsa actualizar.".into()),
-            FetchError::Expired => ("Tu sesión de Claude expiró", "Abre Claude Code para renovarla; el monitor se actualizará solo.".into()),
+            FetchError::NoLogin => ("Inicia sesión en Claude Code", "Abre una terminal, escribe claude y luego /login. Tally lo detectará en unos minutos.".into()),
+            FetchError::Expired => ("Tu sesión de Claude expiró", "Abre una terminal, escribe claude y luego /login. Tally lo detectará en unos minutos.".into()),
             FetchError::Network => ("Sin conexión", "Reintentaré en 5 minutos.".into()),
             FetchError::RateLimited(s) => ("Demasiadas consultas", format!("Anthropic pidió esperar; reintentaré en {} min.", (s + 59) / 60)),
             FetchError::Bad(s) => ("No pude leer el uso", s.clone()),
@@ -57,7 +57,7 @@ fn read_token() -> Option<String> {
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("USERPROFILE").map(|h| PathBuf::from(h).join(".claude")))?;
     let v: Value = serde_json::from_str(&fs::read_to_string(dir.join(".credentials.json")).ok()?).ok()?;
-    v["claudeAiOauth"]["accessToken"].as_str().map(String::from)
+    v["claudeAiOauth"]["accessToken"].as_str().filter(|t| !t.is_empty()).map(String::from)
 }
 
 fn parse(body: &str) -> Option<Usage> {

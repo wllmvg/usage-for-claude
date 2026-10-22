@@ -9,7 +9,7 @@ use std::cell::Cell;
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use usage::{FetchError, Limit, Usage};
-use windows::core::{w, Result, HSTRING};
+use windows::core::{w, Result};
 use windows::Win32::Foundation::*;
 use windows::Win32::Graphics::Dwm::*;
 use windows::Win32::Graphics::Gdi::*;
@@ -355,7 +355,6 @@ impl App {
     fn command(&mut self, id: u32) {
         let c = &mut self.cfg;
         match id {
-            1 => self.refresh(),
             10..=12 => c.theme = [Theme::Sistema, Theme::Claro, Theme::Oscuro][(id - 10) as usize],
             20..=23 => c.accent = [Accent::Tinta, Accent::Arcilla, Accent::Azul, Accent::Salvia][(id - 20) as usize],
             30..=32 => c.shape = [Shape::Barras, Shape::Anillos, Shape::Numeros][(id - 30) as usize],
@@ -405,51 +404,9 @@ fn settings_rows(c: &Config) -> Vec<draw::Setting> {
 }
 
 fn menu(hwnd: HWND, at: POINT) {
-    let Some(a) = app() else { return };
-    let c = a.cfg.clone();
     unsafe {
-        let item = |m: HMENU, id: u32, text: &str, on: bool| {
-            let _ = AppendMenuW(m, MF_STRING | if on { MF_CHECKED } else { MF_UNCHECKED }, id as usize, &HSTRING::from(text));
-        };
-        let sub = |m: HMENU, text: &str, items: &[(u32, &str, bool)]| {
-            let s = CreatePopupMenu().unwrap();
-            for &(id, t, on) in items {
-                if id == 0 {
-                    let _ = AppendMenuW(s, MF_SEPARATOR, 0, None);
-                } else {
-                    item(s, id, t, on);
-                }
-            }
-            let _ = AppendMenuW(m, MF_POPUP, s.0 as usize, &HSTRING::from(text));
-        };
         let m = CreatePopupMenu().unwrap();
-        item(m, 1, "Actualizar ahora", false);
-        let _ = AppendMenuW(m, MF_SEPARATOR, 0, None);
-        sub(m, "Tema", &[(10, "Sistema", c.theme == Theme::Sistema), (11, "Claro", c.theme == Theme::Claro), (12, "Oscuro", c.theme == Theme::Oscuro)]);
-        sub(m, "Acento", &[(20, "Tinta", c.accent == Accent::Tinta), (21, "Arcilla", c.accent == Accent::Arcilla), (22, "Azul", c.accent == Accent::Azul), (23, "Salvia", c.accent == Accent::Salvia)]);
-        sub(m, "Forma", &[(30, "Barras", c.shape == Shape::Barras), (31, "Anillos", c.shape == Shape::Anillos), (32, "Números", c.shape == Shape::Numeros)]);
-        sub(m, "Densidad", &[(40, "Cómoda", !c.compact), (41, "Compacta", c.compact)]);
-        sub(m, "Mostrar", &[
-            (50, "Sesión de 5 h", c.show_session),
-            (51, "Semana, todos los modelos", c.show_week),
-            (52, "Semana, Opus", c.show_opus),
-            (53, "Hora de reinicio", c.show_reset),
-            (54, "Marca de ritmo", c.show_pace),
-            (55, "Memoria que usa el monitor", c.show_ram),
-        ]);
-        let wl: Vec<String> = WARN.iter().map(|v| format!("Cerca del límite: {v}%")).collect();
-        let cl: Vec<String> = CRIT.iter().map(|v| format!("Casi agotado: {v}%")).collect();
-        sub(m, "Alertas", &[
-            (60, &wl[0], c.warn_at == WARN[0]), (61, &wl[1], c.warn_at == WARN[1]), (62, &wl[2], c.warn_at == WARN[2]), (63, &wl[3], c.warn_at == WARN[3]),
-            (0, "", false),
-            (70, &cl[0], c.crit_at == CRIT[0]), (71, &cl[1], c.crit_at == CRIT[1]), (72, &cl[2], c.crit_at == CRIT[2]),
-            (0, "", false),
-            (75, "Notificar al cruzar un umbral", c.notify),
-        ]);
-        sub(m, "El icono muestra", &[(80, "Sesión", c.tray_metric == TrayMetric::Sesion), (81, "Semana", c.tray_metric == TrayMetric::Semana), (82, "El más alto", c.tray_metric == TrayMetric::Mayor)]);
-        let _ = AppendMenuW(m, MF_SEPARATOR, 0, None);
-        item(m, 90, "Abrir al iniciar Windows", config::startup_enabled());
-        item(m, 99, "Salir", false);
+        let _ = AppendMenuW(m, MF_STRING, 99, w!("Salir"));
         let _ = SetForegroundWindow(hwnd);
         let id = TrackPopupMenu(m, TPM_RETURNCMD | TPM_RIGHTBUTTON | TPM_NONOTIFY, at.x, at.y, 0, hwnd, None).0 as u32;
         let _ = DestroyMenu(m);
