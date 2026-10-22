@@ -4,10 +4,14 @@ Tu límite de Claude en la bandeja de Windows: la sesión de 5 horas, la semana 
 
 **[Descargar](https://github.com/wllmvg/usage-for-claude/releases/latest/download/Tally-Setup-0.1.0.exe)** · [Web](https://wllmvg.github.io/usage-for-claude/) · Windows 10 y 11, x64
 
+<p align="center"><img src="docs/popup.png" width="420" alt="Popup de Tally sobre la barra de tareas: sesión al 38 %, semana al 61 % y Opus al 22 %, cada uno con su barra y la hora de reinicio"></p>
+
 - Icono con tu porcentaje y popup con barras, anillos o solo números.
 - Casi monocromo hasta que cruzas un umbral; entonces cambia de color y Windows te avisa una vez.
 - Unos 5 MB de RAM en reposo, un ejecutable de 388 KB y ninguna dependencia.
 - Sin telemetría: solo habla con `api.anthropic.com`.
+
+![Cuatro variantes del popup: barras por defecto, anillos compactos en azul, solo números cerca del límite y tema claro casi agotado](docs/variantes.png)
 
 ## Instalación
 
